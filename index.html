@@ -66,7 +66,7 @@
         <div class="download-box">
             <input type="text" id="center-url-input" placeholder="Paste Video URL here...">
             <button id="center-download-btn">Get Download Link</button>
-            <div id="result-container" style="min-height: 40px; margin-top: 10px;"></div>
+            <div id="result-container" style="min-height: 40px; margin-top: 10px; width: 100%;"></div>
         </div>
     </div>
     <div id="links-container"></div>
@@ -75,7 +75,6 @@
     <script>
         let adminToken = null;
 
-        // 1. Download API Call (अब सीधे सुरक्षित सर्वर से बात करेगा)
         document.getElementById('center-download-btn').onclick = async () => {
             const urlInput = document.getElementById('center-url-input').value.trim();
             const btn = document.getElementById('center-download-btn');
@@ -96,16 +95,16 @@
                 if (link) {
                     resBox.innerHTML = `<a href="${link}" target="_blank" class="result-btn">⬇ Download MP4</a>`;
                 } else {
-                    resBox.innerHTML = `<p style="color:#ef4444;">Video link not found!</p>`;
+                    // यह नया बॉक्स असली एरर दिखाएगा
+                    resBox.innerHTML = `<div style="background: rgba(0,0,0,0.8); color: #ff6b6b; padding: 10px; border-radius: 8px; font-size: 13px; text-align: left; word-break: break-all; max-height: 150px; overflow-y: auto; border: 1px solid #ef4444;"><b>API Error Details:</b><br>${JSON.stringify(result)}</div>`;
                 }
             } catch (error) {
-                resBox.innerHTML = `<p style="color:#ef4444;">Server error.</p>`;
+                resBox.innerHTML = `<p style="color:#ef4444;">Server error. Not connecting to backend.</p>`;
             } finally {
                 btn.innerText = "Get Download Link";
             }
         };
 
-        // 2. Profile Logic
         function loadProfile() {
             const p = JSON.parse(localStorage.getItem('userProfile')) || { name: "Raman Sharma", pic: "https://via.placeholder.com/150" };
             document.getElementById('display-name').innerText = p.name;
@@ -123,7 +122,6 @@
         };
         loadProfile();
 
-        // 3. Admin & Links Logic
         let tapCount = 0;
         document.getElementById('secret-trigger').onclick = () => {
             tapCount++;
@@ -160,7 +158,6 @@
         }
         renderLinks();
 
-        // 4. 3D Background
         const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
         const shape3D = new THREE.Mesh(new THREE.TorusKnotGeometry(10, 3, 100, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8 }));
@@ -172,4 +169,3 @@
     </script>
 </body>
 </html>
-
