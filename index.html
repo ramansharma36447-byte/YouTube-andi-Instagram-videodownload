@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>All in One Media Downloader</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #content { position: absolute; top: 25%; width: 100%; text-align: center; z-index: 10; pointer-events: none; }
+        h1 { margin: 0; font-size: 3.5rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); letter-spacing: 2px; pointer-events: auto; cursor: pointer; }
+        p.subtitle { font-size: 1.3rem; color: #38bdf8; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); margin-bottom: 20px; }
+        canvas { display: block; }
+        .download-box { display: inline-flex; flex-direction: column; align-items: center; gap: 15px; pointer-events: auto; background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 15px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        #center-url-input { width: 320px; padding: 12px 15px; border-radius: 8px; border: 1px solid #38bdf8; background: rgba(0, 0, 0, 0.5); color: white; font-size: 1rem; outline: none; }
+        #center-download-btn { padding: 10px 30px; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); }
+        #center-download-btn:hover { background-color: #0284c7; color: white; }
+        .result-btn { display: inline-block; margin-top: 5px; padding: 10px 20px; background-color: #ef4444; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+        #profile-btn { position: absolute; top: 20px; right: 30px; padding: 10px 25px; font-size: 1.1rem; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 8px; cursor: pointer; z-index: 20; font-weight: bold; }
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px); padding: 30px; border-radius: 15px; text-align: center; z-index: 30; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); width: 320px; }
+        .modal img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; border: 3px solid #38bdf8; object-fit: cover; }
+        .modal h2, .modal h3 { margin: 0 0 10px 0; color: #38bdf8; }
+        input[type="text"], textarea { width: 90%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #38bdf8; background: rgba(0, 0, 0, 0.5); color: white; }
+        textarea { resize: none; height: 60px; }
+        .btn-group { display: flex; gap: 10px; } .btn { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-edit { background: #38bdf8; color: #0f172a; } .btn-close { background: #475569; color: white; } .btn-save { background: #22c55e; color: white; }
+        #edit-section { display: none; } #links-container { position: absolute; bottom: 30px; width: 100%; text-align: center; z-index: 20; pointer-events: auto; }
+        .nav-link { color: #38bdf8; margin: 0 15px; text-decoration: none; font-size: 1.1rem; font-weight: bold; transition: 0.3s; }
+    </style>
+</head>
+<body>
+    <button id="profile-btn">Profile</button>
+
+    <div id="profile-modal" class="modal">
+        <div id="view-section">
+            <img id="display-pic" src="" alt="Profile">
+            <h2 id="display-name">Loading...</h2>
+            <div class="btn-group">
+                <button class="btn btn-edit" id="edit-btn">Edit</button>
+                <button class="btn btn-close" id="close-profile-btn">Close</button>
+            </div>
+        </div>
+        <div id="edit-section">
+            <h3>Edit Profile</h3>
+            <input type="text" id="input-name" placeholder="Name">
+            <input type="text" id="input-pic" placeholder="Image URL">
+            <div class="btn-group">
+                <button class="btn btn-save" id="save-profile-btn">Save</button>
+                <button class="btn btn-close" id="cancel-edit-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="modal">
+        <h3>Admin Panel</h3>
+        <input type="text" id="l-name" placeholder="Link Name">
+        <input type="text" id="l-url" placeholder="URL">
+        <div class="btn-group">
+            <button class="btn btn-save" onclick="saveLink()">Add Link</button>
+            <button class="btn btn-close" onclick="document.getElementById('admin-panel').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <div id="content">
+        <h1 id="secret-trigger">All in One Media Downloader</h1>
+        <p class="subtitle">Interactive 3D Homepage</p>
+        <div class="download-box">
+            <input type="text" id="center-url-input" placeholder="Paste Video URL here...">
+            <button id="center-download-btn">Get Download Link</button>
+            <div id="result-container" style="min-height: 40px; margin-top: 10px;"></div>
+        </div>
+    </div>
+    <div id="links-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let adminToken = null;
+
+        // 1. Download API Call (अब सीधे सुरक्षित सर्वर से बात करेगा)
+        document.getElementById('center-download-btn').onclick = async () => {
+            const urlInput = document.getElementById('center-url-input').value.trim();
+            const btn = document.getElementById('center-download-btn');
+            const resBox = document.getElementById('result-container');
+
+            if (!urlInput) { alert("Please paste a URL first!"); return; }
+            btn.innerText = "Processing..."; resBox.innerHTML = "";
+
+            try {
+                const response = await fetch(`/api/download`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput })
+                });
+                const result = await response.json(); 
+
+                let link = result.url || result.video || result.video_url || (result.data && result.data.url) || (result.medias && result.medias[0].url);
+                if (link) {
+                    resBox.innerHTML = `<a href="${link}" target="_blank" class="result-btn">⬇ Download MP4</a>`;
+                } else {
+                    resBox.innerHTML = `<p style="color:#ef4444;">Video link not found!</p>`;
+                }
+            } catch (error) {
+                resBox.innerHTML = `<p style="color:#ef4444;">Server error.</p>`;
+            } finally {
+                btn.innerText = "Get Download Link";
+            }
+        };
+
+        // 2. Profile Logic
+        function loadProfile() {
+            const p = JSON.parse(localStorage.getItem('userProfile')) || { name: "Raman Sharma", pic: "https://via.placeholder.com/150" };
+            document.getElementById('display-name').innerText = p.name;
+            document.getElementById('display-pic').src = p.pic;
+            document.getElementById('input-name').value = p.name;
+            document.getElementById('input-pic').value = p.pic;
+        }
+        document.getElementById('profile-btn').onclick = () => { document.getElementById('profile-modal').style.display = 'block'; loadProfile(); };
+        document.getElementById('close-profile-btn').onclick = () => document.getElementById('profile-modal').style.display = 'none';
+        document.getElementById('edit-btn').onclick = () => { document.getElementById('view-section').style.display='none'; document.getElementById('edit-section').style.display='block'; };
+        document.getElementById('cancel-edit-btn').onclick = () => { document.getElementById('view-section').style.display='block'; document.getElementById('edit-section').style.display='none'; loadProfile(); };
+        document.getElementById('save-profile-btn').onclick = () => {
+            localStorage.setItem('userProfile', JSON.stringify({ name: document.getElementById('input-name').value, pic: document.getElementById('input-pic').value }));
+            loadProfile(); document.getElementById('cancel-edit-btn').click();
+        };
+        loadProfile();
+
+        // 3. Admin & Links Logic
+        let tapCount = 0;
+        document.getElementById('secret-trigger').onclick = () => {
+            tapCount++;
+            if (tapCount === 5) {
+                let pass = prompt("Enter Password:");
+                if (pass) {
+                    fetch(`/api/admin-login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pass }) })
+                    .then(res => res.json()).then(data => {
+                        if (data.success) { adminToken = data.token; document.getElementById('admin-panel').style.display = 'block'; } 
+                        else { alert("Wrong Password!"); }
+                    });
+                }
+                tapCount = 0;
+            }
+            setTimeout(() => { tapCount = 0; }, 2000); 
+        };
+
+        async function saveLink() {
+            const name = document.getElementById('l-name').value; const url = document.getElementById('l-url').value;
+            if(name && url && adminToken) {
+                const res = await fetch(`/api/links`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: adminToken, name, url }) });
+                const data = await res.json();
+                if(data.success) { renderLinks(); document.getElementById('l-name').value=''; document.getElementById('l-url').value=''; }
+            }
+        }
+
+        async function renderLinks() {
+            const res = await fetch(`/api/links`); const links = await res.json();
+            const container = document.getElementById('links-container'); container.innerHTML = "";
+            links.forEach(link => {
+                const a = document.createElement('a'); a.href = link.url; a.className = "nav-link"; a.innerText = link.name; a.target = "_blank";
+                container.appendChild(a);
+            });
+        }
+        renderLinks();
+
+        // 4. 3D Background
+        const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
+        const shape3D = new THREE.Mesh(new THREE.TorusKnotGeometry(10, 3, 100, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8 }));
+        scene.add(shape3D); scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const pointLight = new THREE.PointLight(0xffffff, 1); pointLight.position.set(20, 20, 20); scene.add(pointLight);
+        camera.position.z = 45;
+        function animate() { requestAnimationFrame(animate); shape3D.rotation.x += 0.01; shape3D.rotation.y += 0.01; renderer.render(scene, camera); }
+        animate();
+    </script>
+</body>
+</html>
+
