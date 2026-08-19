@@ -14,26 +14,24 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 let linksDB = [];
 
-// 1. Download API (UPDATED FOR NEW FREE API)
+// 1. Download API (100% FREE - No RapidAPI Needed)
 app.post('/api/download', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
-    // नया API Address
-    const apiUrl = 'https://all-media-downloader1.p.rapidapi.com/all';
+    // Cobalt API - 100% Free Video Downloader
+    const apiUrl = 'https://api.cobalt.tools/api/json';
     const options = {
         method: 'POST',
         headers: {
-            'x-rapidapi-key': RAPIDAPI_KEY,
-            'x-rapidapi-host': 'all-media-downloader1.p.rapidapi.com',
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
-        body: new URLSearchParams({ url: url })
+        body: JSON.stringify({ url: url })
     };
 
     try {
