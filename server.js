@@ -19,20 +19,21 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 let linksDB = [];
 
-// 1. Download API
+// 1. Download API (UPDATED FOR NEW FREE API)
 app.post('/api/download', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
-    const apiUrl = 'https://auto-download-all-in-one.p.rapidapi.com/v1/social/autolink';
+    // नया API Address
+    const apiUrl = 'https://all-media-downloader1.p.rapidapi.com/all';
     const options = {
         method: 'POST',
         headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
-            'x-rapidapi-host': 'auto-download-all-in-one.p.rapidapi.com',
-            'Content-Type': 'application/json'
+            'x-rapidapi-host': 'all-media-downloader1.p.rapidapi.com',
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify({ url })
+        body: new URLSearchParams({ url: url })
     };
 
     try {
